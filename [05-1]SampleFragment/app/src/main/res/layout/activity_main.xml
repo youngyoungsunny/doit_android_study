@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/container"
+    >
+
+    <fragment
+        android:id="@+id/mainFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:name="org.techtown.fragment.MenuFragment"/>
+//태그의 이름으로 프래그먼트의 이름을 사용할 수 없음. 따라서 패키지 이름을 포함한 이름으로 설정한 것임.
+</RelativeLayout>
