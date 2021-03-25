@@ -1,117 +1,137 @@
 package org.techtown.diary;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
-
-import androidx.fragment.app.Fragment;
-
+import android.os.Environment;
+import android.provider.MediaStore;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.core.content.FileProvider;
+import androidx.fragment.app.Fragment;
 
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link Fragment2.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link Fragment2#newInstance} factory method to
- * create an instance of this fragment.
- */
+import com.github.channguyen.rsv.RangeSliderView;
+
+import java.io.File;
+import java.util.Date;
+
 public class Fragment2 extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    private static final String TAG = "Fragment2";
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    Context context;
+    OnTabItemSelectedListener listener;
+    OnRequestListener requestListener;
 
-    private OnFragmentInteractionListener mListener;
+    ImageView weatherIcon;
+    TextView dateTextView;
+    TextView locationTextView;
 
-    public Fragment2() {
-        // Required empty public constructor
-    }
+    EditText contentsInput;
+    ImageView pictureImageView;
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment Fragment2.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static Fragment2 newInstance(String param1, String param2) {
-        Fragment2 fragment = new Fragment2();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
+    boolean isPhotoCaptured;
+    boolean isPhotoFileSaved;
+    boolean isPhotoCanceled;
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
-    }
+    int selectedPhotoMenu;
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.fragment2, container, false);
-
-        initUI(rootView);
-
-        return rootView;
-    }
-
-    private void initUI(ViewGroup rootView){
-
-    }
-
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
-    }
+    File file;
+    Bitmap resultPhotoBitmap;
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
+
+        this.context = context;
+
+        if (context instanceof OnTabItemSelectedListener) {
+            listener = (OnTabItemSelectedListener) context;
+        }
+
+        if (context instanceof OnRequestListener) {
+            requestListener = (OnRequestListener) context;
         }
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        mListener = null;
+
+        if (context != null) {
+            context = null;
+            listener = null;
+            requestListener = null;
+        }
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.fragment2, container, false);
+
+        initUI(rootView);
+
+        // check current location
+        if (requestListener != null) {
+            requestListener.onRequest("getCurrentLocation");
+        }
+
+        return rootView;
+    }
+
+    private void initUI(ViewGroup rootView) {
+
+        Button saveButton = rootView.findViewById(R.id.saveButton);
+        saveButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (listener != null) {
+                    listener.onTabSelected(0);
+                }
+            }
+        });
+
+        Button deleteButton = rootView.findViewById(R.id.deleteButton);
+        deleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (listener != null) {
+                    listener.onTabSelected(0);
+                }
+            }
+        });
+
+        Button closeButton = rootView.findViewById(R.id.closeButton);
+        closeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (listener != null) {
+                    listener.onTabSelected(0);
+                }
+            }
+        });
+
+        RangeSliderView sliderView = rootView.findViewById(R.id.sliderView);
+        final RangeSliderView.OnSlideListener listener = new RangeSliderView.OnSlideListener() {
+            @Override
+            public void onSlide(int index) {
+                Toast.makeText(context, "moodIndex changed to " + index, Toast.LENGTH_LONG).show();
+            }
+        };
+
+        sliderView.setInitialIndex(2);
     }
 }

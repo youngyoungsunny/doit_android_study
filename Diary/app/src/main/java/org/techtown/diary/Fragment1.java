@@ -1,7 +1,6 @@
 package org.techtown.diary;
 
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -64,7 +63,7 @@ public class Fragment1 extends Fragment {
             @Override
             public void onClick(View v){
                 if(listener != null){
-                    listener.onTabSelected(1);
+                   // listener.onTabSelected(1);
                 }
             }
         });
@@ -76,6 +75,7 @@ public class Fragment1 extends Fragment {
                 Toast.makeText(getContext(), tabText, Toast.LENGTH_SHORT).show();
 
                 adapter.switchLayout(position);
+
                 adapter.notifyDataSetChanged();
             }
         });
