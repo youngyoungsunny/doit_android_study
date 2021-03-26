@@ -2,53 +2,61 @@ package org.techtown.diary;
 
 import android.content.Context;
 import android.os.Bundle;
-
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.google.android.material.tabs.TabLayout;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import lib.kingja.switchbutton.SwitchMultiButton;
 
+
+/**
+ * 날씨 아이콘
+ *
+ * ① 맑음
+ * ② 구름 조금
+ * ③ 구름 많음
+ * ④ 흐림
+ * ⑤ 비
+ * ⑥ 눈/비
+ * ⑦ 눈
+ */
 public class Fragment1 extends Fragment {
 
     RecyclerView recyclerView;
     NoteAdapter adapter;
 
     Context context;
-    TabLayout.OnTabSelectedListener listener;
+    OnTabItemSelectedListener listener;
 
     @Override
-    public void onAttach(Context context){
+    public void onAttach(Context context) {
         super.onAttach(context);
 
         this.context = context;
 
-        if(context instanceof TabLayout.OnTabSelectedListener){
-            listener = (TabLayout.OnTabSelectedListener)context;
+        if (context instanceof OnTabItemSelectedListener) {
+            listener = (OnTabItemSelectedListener) context;
         }
     }
 
     @Override
-    public void onDetach(){
+    public void onDetach() {
         super.onDetach();
 
-        if(context != null){
+        if (context != null) {
             context = null;
             listener = null;
         }
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.fragment1, container, false);
 
         initUI(rootView);
@@ -56,14 +64,15 @@ public class Fragment1 extends Fragment {
         return rootView;
     }
 
-    private void initUI(ViewGroup rootView){
+
+    private void initUI(ViewGroup rootView) {
 
         Button todayWriteButton = rootView.findViewById(R.id.todayWriteButton);
-        todayWriteButton.setOnClickListener(new View.OnClickListener(){
+        todayWriteButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v){
-                if(listener != null){
-                   // listener.onTabSelected(1);
+            public void onClick(View v) {
+                if (listener != null) {
+                    listener.onTabSelected(1);
                 }
             }
         });
@@ -75,7 +84,6 @@ public class Fragment1 extends Fragment {
                 Toast.makeText(getContext(), tabText, Toast.LENGTH_SHORT).show();
 
                 adapter.switchLayout(position);
-
                 adapter.notifyDataSetChanged();
             }
         });
